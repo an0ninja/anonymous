@@ -1,27 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 #/bin/anonymous
-#v0.160513-2
-#code-name: Friday the 13th
-clear
+#kali linux anonymous script
+#indigopsy 2016-03-28 v.01
 
-#====================C O L O R S====================
-
-RED='\033[1;31m'
-NC='\033[0m'
-
-
-printf "${RED}   ###    ##    ##  #######  ##    ## ##    ## ##     ##  #######  ##     ##  ###### \n"
-printf "  ## ##   ###   ## ##     ## ###   ##  ##  ##  ###   ### ##     ## ##     ## ##    ##\n"
-printf " ##   ##  ####  ## ##     ## ####  ##   ####   #### #### ##     ## ##     ## ##      \n"
-printf "##     ## ## ## ## ##     ## ## ## ##    ##    ## ### ## ##     ## ##     ##  ###### \n"
-printf "######### ##  #### ##     ## ##  ####    ##    ##     ## ##     ## ##     ##       ##\n"
-printf "##     ## ##   ### ##     ## ##   ###    ##    ##     ## ##     ## ##     ## ##    ##\n"
-printf "##     ## ##    ##  #######  ##    ##    ##    ##     ##  #######   #######   ###### ${NC}\n"
-
+# sudo apt-get install macchanger resolvconf curl
 
 #====================R O O T   O N L Y====================
 
-if [ $EUID -ne 0 ]; then
+if  ! [ $(id -u) = 0 ]; then
 	printf "\n\n${RED}Please run script as root !!!${NC}\n\n"
 	exit 1
 fi
@@ -34,9 +20,9 @@ TOR_UID="debian-tor"
 TRANS_PORT="9040"
 TO_KILL="chrome midor iceweasel megasync firefox pidgin skype thunderbird noip2 qbittorrent remmina"  # separate by space
 BLEACHBIT_CLEANERS="bash.history system.cache system.clipboard system.custom system.recent_documents system.rotated_logs system.tmp system.trash"  # separate by space
-REAL_HOSTNAME="terminal"
+REAL_HOSTNAME="z3r0"
 NAMESERVER="127.0.0.1"
-RESOLV_CONF="/etc/resolv.conf"
+RESOLV_CONF="/lib/systemd/resolv.conf"
 INTERFACES="eth0 wlan0" # separate by space
 CHECK_URL="https://check.torproject.org/?lang=en_US"
 TEMP_FILE="/tmp/tor_check.tmp"
@@ -200,8 +186,8 @@ do_start() {
 	printf "\n${RED}CHANGE MAC ADDRESS: ${NC}"
 	change_mac
 
-	#printf "\n${RED}CHANGE HOSTNAME: ${NC}"
-	#change_hostname
+	printf "\n${RED}CHANGE HOSTNAME: ${NC}"
+	change_hostname
 
 	printf "\n${RED}START TOR: ${NC}"
 	killer tor 1
@@ -238,8 +224,8 @@ do_stop() {
 	printf "\n${RED}CHANGE MAC ADDRESS: ${NC}"
 	change_mac
 
-	#printf "\n\n${RED}RESTORE ORIGINAL HOSTNAME: ${NC}\n"
-	#change_hostname $REAL_HOSTNAME
+	printf "\n\n${RED}RESTORE ORIGINAL HOSTNAME: ${NC}\n"
+	change_hostname $REAL_HOSTNAME
 
 	printf "\n${RED}WIPE HISTORY: ${NC}"
 	bleachbit -c $BLEACHBIT_CLEANERS >/dev/null
@@ -271,11 +257,11 @@ do_status() {
 	if grep -q "$RESULT" "$TEMP_FILE"; then
 		printf "\nAnonymous: [ON]"
 		printf "\nPublic IP: $IP\n"
-		notify-send -i $ICON -u critical "$(echo -e "Anonymous ON\nPublic IP: $IP")"
+		notify-send -i $ICON -u critical "Anonymous ON" \ "Public IP: $IP"
 	else
 		printf "\nAnonymous: [OFF]"
 		printf "\nPublic IP: $IP\n"
-		notify-send -i $ICON -u critical "$(echo -e "Anonymous OFF\nPublic IP: $IP")"
+		notify-send -i $ICON -u critical "Anonymous ON" \ "Public IP: $IP"
 	fi
 
 	rm $TEMP_FILE
@@ -287,7 +273,7 @@ do_status() {
 
 killer() {
 
-	DISTRO=$(lsb_release -si)
+	DISTRO=$(lsb_release -i)
 
 	if [[ $DISTRO == "Ubuntu" ]] ; then
 		STAT1="start/running"
