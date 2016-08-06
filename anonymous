@@ -1,14 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 #/bin/anonymous
 #kali linux anonymous script
 #indigopsy 2016-03-28 v.01
-
 # sudo apt-get install macchanger resolvconf curl
+
+
+Green="\033[0;32m"
+NC='\033[0m'
+RED='\033[1;31m'
 
 #====================R O O T   O N L Y====================
 
 if  ! [ $(id -u) = 0 ]; then
-	printf "\n\n${RED}Please run script as root !!!${NC}\n\n"
+	printf "\n\n${Green}Please run script as root !!!${NC}\n\n"
 	exit 1
 fi
 
@@ -26,21 +30,21 @@ RESOLV_CONF="/lib/systemd/resolv.conf"
 INTERFACES="eth0 wlan0" # separate by space
 CHECK_URL="https://check.torproject.org/?lang=en_US"
 TEMP_FILE="/tmp/tor_check.tmp"
-ICON="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/anonymous.png"
+ICON="/root/anonymous.png"
 
 check_apps() {
 	printf "\n${RED}CHECK REQUIRED APPS: ${NC}"
 
 	if command -v tor >/dev/null ; then
-		printf "\ntor: [OK]"
+		printf "\ntor: [${Green}OK${NC}]"
 		if command -v macchanger >/dev/null ; then
-			printf "\nmacchanger: [OK]"
+			printf "\nmacchanger: [${Green}OK${NC}]"
 			if command -v resolvconf >/dev/null ; then
-				printf "\nresolvconf: [OK]"
+				printf "\nresolvconf: [${Green}OK${NC}]"
 				if command -v bleachbit >/dev/null ; then
-					printf "\nbleachbit: [OK]"
+					printf "\nbleachbit: [${Green}OK${NC}]"
 					if command -v notify-send >/dev/null ;then
-						printf "\nnotify-send: [OK]\n"
+						printf "\nnotify-send: [${Green}OK${NC}]\n"
 						check_configs
 					else
 						printf "\nnotify-send: is ${RED}not installed!${NC} Install it now? (y/n) "
@@ -123,7 +127,7 @@ check_configs() {
 
 		fi
 	fi
-	printf '\nRUN_DAEMON="yes" [OK]\n'
+	printf '\nRUN_DAEMON="yes" [${Green}OK${NC}]\n'
 
 	grep -q -x 'VirtualAddrNetwork 10.192.0.0/10' /etc/tor/torrc
 	VAR1=$?
@@ -156,10 +160,10 @@ check_configs() {
 			exit 1
 		fi
 	done
-	printf "\nVirtualAddrNetwork 10.192.0.0/10 [OK]"
-	printf "\nTransPort 9040 [OK]"
-	printf "\nDNSPort 53 [OK]"
-	printf "\nAutomapHostsOnResolve 1 [OK]\n"
+	printf "\nVirtualAddrNetwork 10.192.0.0/10 [${Green}OK${NC}]"
+	printf "\nTransPort 9040 [${Green}OK${NC}]"
+	printf "\nDNSPort 53 [${Green}OK${NC}]"
+	printf "\nAutomapHostsOnResolve 1 [${Green}OK${NC}]\n"
 
 
 
@@ -229,7 +233,7 @@ do_stop() {
 
 	printf "\n${RED}WIPE HISTORY: ${NC}"
 	bleachbit -c $BLEACHBIT_CLEANERS >/dev/null
-	printf "[OK]\n"
+	printf "[${Green}OK${NC}]\n"
 
 	printf "\n${RED}START RESOLVCONF: ${NC}"
 	killer resolvconf 1
@@ -249,7 +253,7 @@ do_status() {
 		printf '.'
 		sleep 1s
 	done
-	printf "[OK]"
+	printf "[${Green}OK${NC}]"
 
 	IP=$(egrep -m1 -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$TEMP_FILE")
 	RESULT="Congratulations. This browser is configured to use Tor."
@@ -273,16 +277,16 @@ do_status() {
 
 killer() {
 
-	DISTRO=$(lsb_release -i)
+	DISTRO=$(lsb_release -si)
 
 	if [[ $DISTRO == "Ubuntu" ]] ; then
 		STAT1="start/running"
 		STAT2="stop/waiting"
 		COMM=$(service $1 status | grep "$STAT1" | grep -v "$STAT2" | wc -l)
-	elif [[ $DISTRO == "Kali" ]] ; then
+	elif [[ $DISTRO == "Kali" ]]; then
 		STAT1="active"
 		STAT2="dead"
-		COMM=$(service $1 status | grep $STAT1 | grep $STAT2 )
+		COMM=$(service $1 status | grep $STAT1 )
 	fi
 
 	#STATE=$(service $1 status | grep "$STAT1" | grep -v "$STAT2" | wc -l)
@@ -295,7 +299,7 @@ killer() {
 				printf "trying to stop $1 ... "
 				service $1 stop > /dev/null 2>&1
 				sleep 1s
-				STATE=$(service $1 status | grep $STAT1 | grep $STAT2 )
+				STATE=$(service $1 status | grep $STAT1)
 				RET=$?
 				#echo "ret je sada $RET"
 				#echo "stanje servisa $STATE"
@@ -303,15 +307,15 @@ killer() {
 				printf "trying to start $1 ... "
 				service $1 start > /dev/null 2>&1
 				sleep 1s
-				STATE=$(service $1 status | grep $STAT1 | grep $STAT2 )
+				STATE=$(service $1 status | grep $STAT2 )
 				RET=$?
 				#echo "ret je sada $RET"
 				#echo "stanje servisa $STATE"
 			fi
 		done
-		printf "[OK]\n"
+		printf "${Green}[${Green}OK${NC}]\n${NC}"
 	else
-		printf "[OK]\n"
+		printf "${Green}[${Green}OK${NC}]\n${NC}"
 	fi
 }
 
@@ -351,7 +355,7 @@ redirect_to_tor() {
 
 	printf "new $(iptables_check)"
 
-	printf "\nRouting comleted [OK]\n"
+	printf "\nRouting comleted [${Green}OK${NC}]\n"
 }
 
 
@@ -361,9 +365,9 @@ restore_iptables() {
 	if [ -f /etc/network/iptables.rules ]; then
 		iptables-restore < /etc/network/iptables.rules
 		rm /etc/network/iptables.rules
-		printf "[OK]\n"
+		printf "[${Green}OK${NC}]\n"
 	else
-		printf "nothing to restore [OK]\n"
+		printf "nothing to restore [${Green}OK${NC}]\n"
 	fi
 
 }
@@ -382,7 +386,7 @@ iptables_flush() {
 iptables_check() {
 	printf "iptables rules: ${NC}"
 	RULES=$(sudo iptables -n -L -v --line-numbers | egrep "^[0-9]" | wc -l)
-	printf "$RULES [OK]\n"
+	printf "$RULES [${Green}OK${NC}]\n"
 }
 
 
@@ -392,11 +396,11 @@ check_nameserver() {
 	echo "nameserver $NAMESERVER" > $RESOLV_CONF
 	resolv_address=$(cat $RESOLV_CONF | cut -d " " -f 2)
 
-	if [[ $resolv_address != $NAMESERVER ]] ; then
-		printf "\n${RED}Nameserver config ERROR. Exiting ... ${NC}\n"
+	if ![ $resolv_address = $NAMESERVER ] ; then
+		printf "\n${RD}Nameserver config ERROR. Exiting ... ${NC}\n"
 		exit 1
 	else
-		printf "nameserver: $resolv_address [OK]\n"
+		printf "nameserver: $resolv_address [${Green}OK${NC}]\n"
 	fi
 }
 
@@ -429,7 +433,7 @@ change_mac() {
 		read MAC </sys/class/net/$device/address
 
 
-		printf "\n$device new MAC address: $MAC [OK]"
+		printf "\n$device new MAC address: $MAC [${Green}OK${NC}]"
 		#printf "   $(macchanger -A $device)\n"
 	done
 	printf "\n"
@@ -443,9 +447,9 @@ kill_processes() {
 		if pgrep $KILLPID >/dev/null 2>&1 ; then
 			printf "\n$KILLPID: ${RED}Alive!${NC} Trying to kill ..."
 			pkill -9 $KILLPID
-			printf "[OK]"
+			printf "[${Green}OK${NC}"
 		else
-			printf "\n$KILLPID: Already Dead [OK]"
+			printf "\n$KILLPID: Already Dead [${Green}OK${NC}]"
 		fi
 	done
 	printf "\n"
