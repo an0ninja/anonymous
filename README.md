@@ -13,9 +13,10 @@ Install:
 ---
 
 ```
-git clone https://github.com/indigopsy/anonymous.git
+git clone https://github.com/an0ninja/anonymous.git
 cd anonymous
 chmod +x anonymous
+cp anonymous /usr/bin/anonymous
 ```
 
 
@@ -23,8 +24,8 @@ Usage:
 ---
 
 ```
-sudo ./anonymous start
-sudo ./anonymous stop
-sudo ./anonymous status
+sudo anonymous start
+sudo anonymous stop
+sudo anonymous status
 
 ```
